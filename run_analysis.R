@@ -1,8 +1,6 @@
 ## Coursera Class 3
 ## Programming Assignment
 
-setwd("~/Dropbox/STATS TUTORIALS/Mate and Methods/Programming Assignments/Course4 Assignment 1/GettingCleaningDataProgrammingAssignment")
-
 ##############################################################
 ## Part 1: GETTING THE DATA
 
@@ -64,8 +62,6 @@ dim(subjects); class(subjects); head(subjects)
 names(subjects) <- "subject"; head(subjects)
 ## Add the labels identifying the subjects to the main dataset
 phones <- cbind(phones,subjects)
-str(phones)
-
 
 ## Merge the activity labels for the training and test data into one vector:
 labels <- bind_rows(train_names,test_names) 
@@ -99,31 +95,31 @@ phones <- phones[,-88]
 str(phones)
 
 
-
-## sort by subject & activity label
-phones <- arrange(phones,labels)
-
-
-#############################################################################
-#############################################################################
-#############################################################################
-#############################################################################
-#############################################################################
-
 ## STEP 5 from the assignment instructions
 ## Creates a second, tidy data set with the 
 ## average of each variable for each activity and each subject
+tidyphones <- phones %>% group_by(subject, activity) %>%
+  summarise_each(funs(mean=mean))
+## confirm that the code worked correctly by checking the 
+## number of subjects and activities
+table(tidyphones$subject);table(tidyphones$activity)
+head(tidyphones,15); str(tidyphones)
 
 
+## Rename variables to remove "_mean" suffix from end
+## Since new unit of analysis is subject/activity, 
+## mean suffix is now extraneous
+tidyphones %>%
+  rename_all(.funs = funs(sub("_mean", "", names(tidyphones)))) %>%
+  head(2)
+names(tidyphones) <- gsub("_mean","",names(tidyphones))
+names(tidyphones)
 
 
+## Write the new, tidy dataset to a .txt. file: 
+write.table(tidyphones,file="tidyphones.txt",row.name=FALSE)
 
-# To rename variables using dplyr
-rename(phones, label = , subject = )
-
-# To create new variables using dplyr
-mutate(phones, newvar = formula based on old variable)
-
-# Make new dataset grouped by some var and then get summary stats
-group_by(phones, subject)
-summarize(newphones, pm25=mean(pm25), o3=max(o3mean2))
+#####################################################################
+## To read the data back into R once it's been generated:
+data <- read.table("tidyphones.txt", header = TRUE) 
+#####################################################################
